@@ -6,7 +6,7 @@ from skimage.feature import hog
 import shutil
 import os
 
-# تحميل المودل والـ Scaler
+#Download the model and the scaler
 MODEL_NAME = "random_forest_model.pkl"
 SCALER_NAME = "scaler.pkl"
 
@@ -14,17 +14,17 @@ try:
     model = joblib.load(MODEL_NAME)
     scaler = joblib.load(SCALER_NAME)
 except Exception as e:
-    raise RuntimeError(f"❌ خطأ في تحميل الملفات: {e}")
+    raise RuntimeError(f"❌ Error downloading files: {e}")
 
-# إنشاء API باستخدام FastAPI
+# Create an API using FastAPI
 app = FastAPI()
 
-# دالة معالجة الصورة
+#Image processing function
 
 def extract_red_curve(image_path):
     image = cv2.imread(image_path)
     if image is None:
-        raise HTTPException(status_code=400, detail="❌ خطأ: لم يتم العثور على الصورة.")
+        raise HTTPException(status_code=400, detail="❌ Error: Image not found.")
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     lower_red1 = np.array([0, 100, 100])
@@ -41,7 +41,7 @@ def extract_red_curve(image_path):
     contours, _ = cv2.findContours(red_cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     if not contours:
-        raise HTTPException(status_code=400, detail="❌ لم يتم العثور على أي منحنى باللون الأحمر.")
+        raise HTTPException(status_code=400, detail="❌ No red curve found.")
 
     curve_image = np.zeros_like(red_cleaned)
     cv2.drawContours(curve_image, contours, -1, (255), thickness=4)
@@ -52,7 +52,7 @@ def extract_red_curve(image_path):
     cv2.imwrite(processed_path, resized)
     return processed_path
 
-# دالة استخلاص الميزات
+#Feature extraction function
 
 def extract_hog_features(image):
     resized_image = cv2.resize(image, (64, 64))
@@ -60,7 +60,7 @@ def extract_hog_features(image):
     features = hog(gray, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), block_norm='L2')
     return features
 
-# API لتحميل الصورة والتنبؤ
+# API for image upload and prediction
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     try:
