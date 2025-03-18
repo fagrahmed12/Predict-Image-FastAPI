@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+numpy
+opencv-python
+joblib
+scikit-image
+scikit-learn
+shutil
