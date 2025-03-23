@@ -20,6 +20,11 @@ except Exception as e:
 # إنشاء API باستخدام FastAPI
 app = FastAPI()
 
+# مسار الصفحة الرئيسية
+@app.get("/")
+async def home():
+    return {"message": "API is running successfully!"}
+
 # دالة معالجة الصورة
 def extract_red_curve(image_path):
     image = cv2.imread(image_path)
